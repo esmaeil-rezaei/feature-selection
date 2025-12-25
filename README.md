@@ -337,10 +337,6 @@ A: Trees handle irrelevant features naturally, but selection still helps with: i
 - Feature-Engine: https://feature-engine.readthedocs.io
 - MLxtend: http://rasbt.github.io/mlxtend/
 
-## License
-
-[Specify your license here - MIT, Apache 2.0, etc.]
-
 ---
 
 
