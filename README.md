@@ -1,4 +1,4 @@
-# Feature Selection Methods: A Comprehensive Implementation Guide
+# Feature Selection Methods
 
 ## Overview
 
