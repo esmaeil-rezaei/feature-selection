@@ -26,7 +26,7 @@ Feature selection is critical for:
 │   ├── 1.4 filtering-by-corr-using-feature-engine.ipynb
 │   ├── 1.5 filtering-pipeline-quasi-const-corr-feature-engine.ipynb
 │   ├── 1.6 filtering-statistical-metrics.ipynb
-│   ├── 1.7 filtering-chi-square.ipynb
+│   ├── 1.7 filtering-chi-square-fisher-test.ipynb
 │   ├── 1.8 filtering-ANOVA.ipynb
 │   └── 1.9 filtering-univariate-ml.ipynb
 ├── 02 Wrapper Methods
@@ -46,6 +46,10 @@ Feature selection is critical for:
 │   ├── 02 recursive-feature-elimination.ipynb
 │   ├── 03 recursive-feature-addition.ipynb
 │   └── 04 maximum-relevance-minimum-redundancy.ipynb
+├── 05 Time Series Feature Selection
+│   ├── 01 mutual-information.ipynb
+│   ├── 02 distance-correlation.ipynb
+│   └── 03 hilbert-schmidt-independence-criterion.ipynb
 └── README.md
 ```
 
@@ -153,55 +157,56 @@ Advanced techniques combining multiple approaches for robust, comprehensive feat
 - Reduces false discoveries
 - Suitable for critical applications
 
----
 
-## Notebook Descriptions
+### 5. Time Series Feature Selection 🕐
+Specialized methods designed for temporal data where traditional independence assumptions don't hold.
 
-### 0 Introduction
-| Notebook | Description |
-|----------|-------------|
-| `introduction.ipynb` | Comprehensive overview of feature selection paradigms, comparison of methods, decision framework for method selection, and best practices |
+**Implemented Techniques:**
+- Mutual Information (time series adapted)
+- Distance Correlation
+- Hilbert-Schmidt Independence Criterion (HSIC)
 
-### 01 Filtering Methods
-| Notebook | Description |
-|----------|-------------|
-| `1.1 quasi-constant-filtering-basic.ipynb` | Manual implementation of quasi-constant feature detection using variance thresholds |
-| `1.2 quasi-constant filtering by feature-engine.ipynb` | Production-ready quasi-constant removal using Feature-Engine library |
-| `1.3 filtering-by-corr-basic.ipynb` | Basic correlation matrix analysis and feature removal implementation |
-| `1.4 filtering-by-corr-using-feature-engine.ipynb` | Scalable correlation filtering with Feature-Engine DropCorrelatedFeatures |
-| `1.5 filtering-pipeline-quasi-const-corr-feature-engine.ipynb` | Complete preprocessing pipeline combining quasi-constant and correlation filtering |
-| `1.6 filtering-statistical-metrics.ipynb` | Mutual information for feature ranking and selection |
-| `1.7 filtering-chi-square.ipynb` | Chi-square test for categorical feature selection |
-| `1.8 filtering-ANOVA.ipynb` | ANOVA F-test for continuous features in classification |
-| `1.9 filtering-univariate-ml.ipynb` | Univariate metrics (ROC-AUC, MSE) for feature ranking |
+**When to use:**
+- Financial forecasting (stock prices, trading signals)
+- Demand forecasting (sales, inventory)
+- Sensor data analysis (IoT, manufacturing)
+- Healthcare monitoring (vital signs, patient data)
+- Energy consumption prediction
+- Weather and climate modeling
+- Time series classification tasks
+- Sequential pattern recognition
 
-### 02 Wrapper Methods
-| Notebook | Description |
-|----------|-------------|
-| `01 introduction-to-wrappers.ipynb` | Overview of wrapper methods, computational complexity, and use case guidance |
-| `02 wrapper-stepwise-forward.ipynb` | Forward selection algorithm with cross-validation |
-| `03 wrapper-step-backward-elimination.ipynb` | Backward elimination starting from full feature set |
-| `04 wrapper-exhaustive-feature-selection.ipynb` | Brute-force search across all feature combinations |
+**Key Considerations:**
+- **Temporal dependencies**: Features may have lagged relationships
+- **Autocorrelation**: Variables correlated with their own past values
+- **Non-stationarity**: Statistical properties change over time
+- **Seasonality**: Periodic patterns must be preserved
+- **Causality**: Direction of influence matters (Granger causality)
 
-### 03 Embedded Methods
-| Notebook | Description |
-|----------|-------------|
-| `01 embedded-logistic-regression.ipynb` | Using logistic regression coefficients for feature importance |
-| `02 embedded-linear-regression.ipynb` | Linear regression coefficient analysis for feature selection |
-| `03 effect-of-regularization-on-FS.ipynb` | Comparing Ridge, Lasso, and Elastic Net effects on feature selection |
-| `04 embedded-lasso-feature-selection.ipynb` | L1 regularization for automatic feature selection |
-| `05 embedded-tree-based-methods.ipynb` | Random Forest, Gradient Boosting feature importance metrics |
-| `06 embedded-tree-recursive.ipynb` | Combining tree importance with recursive elimination |
+**Advantages:**
+- Captures temporal dependencies and lag relationships
+- Detects non-linear relationships in sequential data
+- Handles autocorrelated features properly
+- Preserves temporal structure during selection
+- Works with multivariate time series
+- Robust to non-stationarity
 
-### 04 Hybrid Methods
-| Notebook | Description |
-|----------|-------------|
-| `01 shuffling.ipynb` | Permutation importance through feature shuffling |
-| `02 recursive-feature-elimination.ipynb` | RFE algorithm with multiple estimators (SVM, RF, etc.) |
-| `03 recursive-feature-addition.ipynb` | Forward-style recursive addition of features |
-| `04 maximum-relevance-minimum-redundancy.ipynb` | Information theory-based mRMR algorithm |
+**Time Series Specific Challenges:**
+- Must respect temporal order (no data leakage)
+- Need to handle multiple lag features
+- Seasonal patterns require special treatment
+- Feature importance changes over time windows
+- Cross-validation requires time-aware splits
 
----
+**Industrial Applications:**
+- **Finance**: Selecting technical indicators for algorithmic trading, risk factor identification
+- **Retail**: Demand forecasting with promotional and calendar features
+- **Manufacturing**: Predictive maintenance using sensor readings and operational metrics
+- **Energy**: Load forecasting with weather and historical consumption patterns
+- **Healthcare**: Patient monitoring with vital signs and treatment history
+- **Marketing**: Campaign effectiveness with time-lagged response variables
+
+
 
 ## Getting Started
 
@@ -215,16 +220,17 @@ seaborn>=0.11.0
 feature-engine>=1.6.0
 mlxtend>=0.19.0
 scipy>=1.7.0
+statsmodels>=0.13.0  # For time series analysis
+dcor>=0.5.3          # For distance correlation
 ```
 
 
----
 
 ## Best Practices
 
 ### General Guidelines
-1. **Always start with basic filtering** (`1.1`, `1.2`, `1.3`, `1.4`) to clean your data
-2. **Use pipelines** (`1.5`) for reproducible, production-ready workflows
+1. **Always start with basic filtering** to clean your data
+2. **Use pipelines** for reproducible, production-ready workflows
 3. **Validate with multiple methods** from different categories
 4. **Document feature selection rationale** for compliance and reproducibility
 5. **Monitor feature importance in production** for drift detection
@@ -234,27 +240,18 @@ scipy>=1.7.0
 9. **Test on hold-out data** to validate selection stability
 10. **Retrain selection periodically** as data distributions evolve
 
-### Method Selection Framework
+### Time Series Specific Guidelines
+1. **Use time-aware cross-validation** (TimeSeriesSplit, expanding/rolling windows)
+2. **Respect temporal order** - never use future data to predict the past
+3. **Handle lag features carefully** - consider multiple time horizons
+4. **Check for stationarity** before applying standard methods
+5. **Account for seasonality** in feature importance evaluation
+6. **Test feature stability** across different time periods
+7. **Consider forecast horizon** when selecting features (short vs long-term)
+8. **Validate on out-of-sample periods** that represent future conditions
+9. **Monitor feature drift** over time in production
+10. **Document temporal relationships** between features and targets
 
-**For Large Datasets (>100K rows, >100 features):**
-- Start: `1.1`, `1.2` (quasi-constant removal)
-- Then: `1.3`, `1.4` (correlation filtering)
-- Apply: `1.6`, `1.7`, `1.8`, `1.9` (statistical filters)
-- Use: `04` (Lasso) or `05` (tree importance) for final selection
-
-**For Medium Datasets (10K-100K rows, 20-100 features):**
-- Start: Basic filtering (`1.1`-`1.4`)
-- Apply: `02` (wrapper methods) with cross-validation
-- Or use: `03` (embedded methods) for efficiency
-- Validate: `04` (hybrid methods)
-
-**For Small Datasets (<10K rows, <20 features):**
-- Clean: Basic filtering (`1.1`-`1.4`)
-- Use: `02` (exhaustive search) if computationally feasible
-- Apply: `01 shuffling.ipynb` for importance validation
-- Consider: Domain expertise over pure algorithmic selection
-
----
 
 ## Contributing
 
@@ -269,7 +266,6 @@ Contributions are welcome! Please follow these guidelines:
 7. **Include performance benchmarks** where applicable
 8. **Add references** to academic papers or original sources
 
----
 
 ## Performance Comparison
 
@@ -279,6 +275,7 @@ Contributions are welcome! Please follow these guidelines:
 | Wrapper | ⚡⚡ | ⭐⭐⭐⭐⭐ | ⬆️⬆️ | 📊📊📊 | Small datasets, optimal performance |
 | Embedded | ⚡⚡⚡⚡ | ⭐⭐⭐⭐ | ⬆️⬆️⬆️⬆️ | 📊📊📊📊 | Production systems, automatic selection |
 | Hybrid | ⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ⬆️⬆️⬆️ | 📊📊📊📊📊 | Research, validation, critical systems |
+| Time Series | ⚡⚡⚡ | ⭐⭐⭐⭐ | ⬆️⬆️⬆️ | 📊📊📊 | Temporal data, forecasting applications |
 
 ---
 
@@ -301,15 +298,28 @@ Contributions are welcome! Please follow these guidelines:
 **Issue:** Different methods give different results
 - **Solution:** This is expected - combine results, use `04 Hybrid Methods` for consensus
 
----
+### Time Series Specific Issues
+
+**Issue:** Standard methods ignore temporal relationships
+- **Solution:** Use `05 Time Series` methods specifically designed for temporal dependencies
+
+**Issue:** Feature importance changes across time periods
+- **Solution:** Perform rolling window feature selection, monitor stability metrics
+
+**Issue:** Lag features showing spurious importance
+- **Solution:** Check for autocorrelation, use distance correlation (`05/02`), test with different lag values
+
+**Issue:** Data leakage in time series cross-validation
+- **Solution:** Always use TimeSeriesSplit or forward-chaining validation, never shuffle temporal data
+
 
 ## FAQ
 
 **Q: Which method should I start with?**
-A: Always start with `1. filtering` for data cleaning, then choose based on dataset size and computational budget.
+A: Always start with `01 Filtering Methods` for data cleaning, then choose based on dataset size and computational budget. For time series, add `05 Time Series` methods after basic filtering.
 
 **Q: Can I combine methods from different categories?**
-A: Yes! Sequential application is recommended: Filtering → Embedded → Wrapper/Hybrid for validation.
+A: Yes! Sequential application is recommended: Filtering → Time Series (if applicable) → Embedded → Wrapper/Hybrid for validation.
 
 **Q: How do I choose the right threshold?**
 A: Use cross-validation to evaluate performance at different thresholds, consider business constraints and domain expertise.
@@ -323,22 +333,40 @@ A: Depends on model complexity, interpretability needs, and performance goals. S
 **Q: Do I need to select features if using tree-based models?**
 A: Trees handle irrelevant features naturally, but selection still helps with: interpretability, speed, preventing overfitting, and reducing storage.
 
----
+**Q: How do time series methods differ from standard methods?**
+A: Time series methods preserve temporal structure, handle autocorrelation properly, and can detect lagged relationships that standard methods miss.
+
+**Q: Can I use standard feature selection on time series data?**
+A: You can, but you'll miss temporal dependencies and lagged relationships. Always complement with `05 Time Series` methods for temporal data.
+
+**Q: How do I handle seasonality in feature selection?**
+A: Include seasonal features (month, quarter, day of week), test feature importance within each season separately, or use deseasonalized data for selection.
+
 
 ## References
 
 ### Academic Papers
-- Guyon, I., & Elisseeff, A. (2003). An introduction to variable and feature selection. JMLR.
-- Kohavi, R., & John, G. H. (1997). Wrappers for feature subset selection. Artificial Intelligence.
-- Ding, C., & Peng, H. (2005). Minimum redundancy feature selection from microarray gene expression data. JBI.
+- Guyon, I., & Elisseeff, A. (2003). An introduction to variable and feature selection. JMLR
+- Kohavi, R., & John, G. H. (1997). Wrappers for feature subset selection. Artificial Intelligence
+- Ding, C., & Peng, H. (2005). Minimum redundancy feature selection from microarray gene expression data. JBI
+- Székely, G. J., & Rizzo, M. L. (2009). Brownian distance covariance. The Annals of Applied Statistics
+- Gretton, A., et al. (2005). Measuring statistical dependence with Hilbert-Schmidt norms. ALT
 
 ### Libraries
 - Scikit-learn: https://scikit-learn.org
 - Feature-Engine: https://feature-engine.readthedocs.io
 - MLxtend: http://rasbt.github.io/mlxtend/
+- Statsmodels: https://www.statsmodels.org
+- dcor: https://dcor.readthedocs.io
 
----
+## Roadmap
 
+### Current Features ✅
+- Complete filtering methods suite
+- Wrapper methods implementation
+- Embedded methods with regularization
+- Hybrid methods for validation
+- **Time series feature selection methods** 🆕
 
 ### Planned Additions
 - [ ] Deep learning feature selection methods
